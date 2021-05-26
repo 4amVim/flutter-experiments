@@ -1,0 +1,81 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Generate Documentation
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  update-docs:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Runs a single command using the runners shell
+      - name: Install flutter
+        run: sudo snap install flutter --classic
+      
+      # Runs a multiple commands using the runners shell
+      - name: Activate dartdoc
+        run: |
+          flutter pub global activate dartdoc
+          echo "$HOME/snap/flutter/common/flutter/.pub-cache/bin" >> $GITHUB_PATH
+      
+      # Checks-out the repository under $GITHUB_WORKSPACE, so job can access it
+      - uses: actions/checkout@v2
+      - name: Generate docs
+        run: dartdoc
+
+      - name: Switch branches
+        run: |
+          git remote set-branches origin '*' #Track all the branches
+          git fetch --depth 1   #Get first commit of all tracked branches
+          git checkout docs
+
+      - name: Update docs
+        run: |
+          git rm -rf .   #Delete old docs
+          #find * -maxdepth 0 -name '.git' -prune -o -exec rm -rf '{}' ';'
+          mv doc/api/* . #Add new docs
+          rm -rf doc     #Clean up a bit
+          git add *
+          
+      - name: Sign in
+        env:
+          TOKEN: ${{ secrets.SKATER_TOKEN }}
+          # Username of the account that's pushing to the repo, i.e. the one who's token is up in TOKEN
+          pusher: skateboarder
+        run: |
+          git config user.email "8619285+skateboarder@users.noreply.github.com"
+          git config --global user.name $pusher
+          
+      - name: Should update?
+         # For reading up on how to set environment variables at runtime:
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        run: (git status | grep -q modified && echo "modded=true" || echo "modded=false" ) >> $GITHUB_ENV
+      
+      - if: env.modded
+        name: Push to remote
+        run: |
+          git status | grep -q modified && git commit -am "$(git rev-parse --short "$GITHUB_SHA")" || echo "Can't commit won't commit"             
+          git push
+          echo "##[set-output name=data;]$(date)"
+
+      - name: Generate badge
+        uses: RubbaBoy/BYOB@v1.2.0
+        with:
+          NAME: last
+          LABEL: 'Docs built on'
+          STATUS: ${{ steps.date.outputs.data }}
+          COLOR: 00EEFF
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - if: env.modded==false 
+        name: There wasn't anything to update
+        run: echo "false"

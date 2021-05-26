@@ -1,0 +1,14 @@
+#include: package:lint/analysis_options.yaml
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+linter:
+  rules:
+    omit_local_variable_types: false
+    await_only_futures: true
+    always_put_required_named_parameters_first: true
+    annotate_overrides: true
+    prefer_expression_function_bodies: true
