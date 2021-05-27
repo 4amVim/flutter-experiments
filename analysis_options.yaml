@@ -1,0 +1,25 @@
+#include: package:lint/analysis_options.yaml
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+
+linter:
+  rules:
+    # always_use_package_imports: true
+    prefer_relative_imports: true
+    omit_local_variable_types: false
+    await_only_futures: true
+    always_put_required_named_parameters_first: true
+    annotate_overrides: true
+    prefer_expression_function_bodies: true
+
+    unnecessary_statements: true
+    avoid_empty_else: true
+    exhaustive_cases: true
+
+#Going to production
+    #avoid_print: true
+    #avoid_type_to_string: true

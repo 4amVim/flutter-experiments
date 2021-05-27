@@ -1,0 +1,1 @@
+A copy of the template over at [flutterStarter](https://github.com/4amVim/flutterStarter)
