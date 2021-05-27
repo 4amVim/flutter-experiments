@@ -50,6 +50,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     style: TextStyle(fontSize: 45))),
                           ]))))));
 
+  //Returns a vertical tape of specified size
   Widget Tape({required double width, required double height}) {
     tape ??= TapeMeasurePaint(width, height);
     return Listener(
@@ -59,10 +60,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
               tape!.offsetBy((details.localPosition.dy - touchStart.dy));
               _debugText = tape!.reading;
             }),
-        onPointerUp: (_) => setState(() => tape!.shiftStart()),
+        onPointerUp: (_) => tape!.shiftStart(),
         child: CustomPaint(
-          painter: tape,
-          child: Container(width: width),
-        ));
+            painter: tape, child: SizedBox(width: width, height: height)));
   }
 }

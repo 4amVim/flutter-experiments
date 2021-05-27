@@ -7,3 +7,7 @@ You can track the development
 Android:
 
 <img  src="./lib/android.gif" width=270 height=585 />
+
+iOS:
+
+<img  src="./lib/ios.gif" width=270 height=585 />
