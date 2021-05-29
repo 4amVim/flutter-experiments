@@ -11,7 +11,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage();
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
