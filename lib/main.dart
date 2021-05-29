@@ -1,4 +1,4 @@
-import 'package:boxy/flex.dart';
+// import 'package:boxy/flex.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -12,7 +12,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage();
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -56,9 +55,7 @@ class Page extends StatelessWidget {
           ProgressWidget(_counter, height: 50, divisions: 5, width: 5000),
           Text('You have pushed the button this many times:'),
           Text('$_counter', style: Theme.of(context).textTheme.headline4),
-          BoxyRow(
-            children: [],
-          )
+          // BoxyRow(children: [])
         ]));
   }
 }
@@ -118,7 +115,8 @@ class _ProgressWidgetState extends State<ProgressWidget>
                       left: (i + 1) * constraints.maxWidth / widget.divisions,
                       child: Container(
                         width: 2,
-                        height: 5000, //?? Why cant I just constraints.minHeight,
+                        height: constraints
+                            .maxHeight, //?? Why cant I just constraints.minHeight,
                         color: Colors.grey.withAlpha(40),
                       ),
                     )),
