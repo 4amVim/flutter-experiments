@@ -95,7 +95,6 @@ class _ProgressWidgetState extends State<ProgressWidget>
                   child: Container(
                     decoration: BoxDecoration(
                         color: Colors.green,
-                        shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(_rounding)),
                     width:
                         widget.scale * constraints.maxWidth / widget.divisions,
