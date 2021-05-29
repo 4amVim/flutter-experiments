@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class ProgressWidget extends StatefulWidget {
@@ -33,9 +31,8 @@ class _ProgressWidgetState extends State<ProgressWidget>
                   alignment: Alignment.centerLeft,
                   child: AnimatedContainer(
                     duration: Duration(seconds: 1),
-                    decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(5)),
+                    curve: Curves.easeInOutSine,
+                    color: Colors.green,
                     width:
                         widget.scale * constraints.maxWidth / widget.divisions,
                   )),
@@ -45,8 +42,12 @@ class _ProgressWidgetState extends State<ProgressWidget>
                         top: 0,
                         bottom: 0,
                         left: (i + 1) * constraints.maxWidth / widget.divisions,
-                        child: Container(
-                            width: 2, color: Colors.grey.withAlpha(40)),
+                        child: ClipRRect(
+                          child: Container(
+                            color: Colors.grey.withAlpha(400),
+                            width: 2,
+                          ),
+                        ),
                       )),
             ],
           ));
