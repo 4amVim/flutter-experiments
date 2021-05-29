@@ -39,8 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class Page extends StatelessWidget {
   const Page({
-    Key? key,
     required int counter,
+    Key? key,
   })  : _counter = counter,
         super(key: key);
 
@@ -53,7 +53,7 @@ class Page extends StatelessWidget {
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-          ProgressWidget(_counter),
+          ProgressWidget(_counter, height: 50, divisions: 5, width: 5000),
           Text('You have pushed the button this many times:'),
           Text('$_counter', style: Theme.of(context).textTheme.headline4),
           BoxyRow(
@@ -64,8 +64,13 @@ class Page extends StatelessWidget {
 }
 
 class ProgressWidget extends StatefulWidget {
-  ProgressWidget(this.scale);
+  final double width;
   final int scale;
+  final double height;
+  final int divisions;
+
+  ProgressWidget(this.scale,
+      {required this.height, this.divisions = 5, this.width = double.infinity});
 
   @override
   _ProgressWidgetState createState() => _ProgressWidgetState();
@@ -73,35 +78,51 @@ class ProgressWidget extends StatefulWidget {
 
 class _ProgressWidgetState extends State<ProgressWidget>
     with SingleTickerProviderStateMixin {
+  final double _rounding = 5;
   @override
-  Widget build(BuildContext context) {
-    print('redrew ?');
-    var _counter = widget.scale;
-    return Container(
-        padding: EdgeInsets.zero,
-        width: 300,
-        height: 200,
-        decoration: BoxDecoration(
-            color: Colors.grey[100],
-            border: Border.all(color: Colors.grey, width: 5),
-            borderRadius: BorderRadius.circular(5)),
-        child: SizedBox(
-          height: 200,
-          child: Container(
-            color: Colors.blue,
-            height: 200,
-            // child: AnimatedSize(
-            //   vsync: this,
-            //   duration: Duration(seconds: 1),
-              child: SizedBox(
-                width: 2.0 * _counter / 5,
-                // height: 5,
-                child: Container(
-                  color: Colors.green,
-                ),
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (_, constraints) => Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.zero,
+              width: widget.width,
+              height: widget.height,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  border: Border.all(color: Colors.grey[400]!, width: 1),
+                  borderRadius: BorderRadius.circular(100)),
+              child: Container(
+                height: constraints.maxHeight,
+                alignment: Alignment.centerLeft,
+                child: AnimatedSize(
+                    vsync: this,
+                    duration: Duration(seconds: 2),
+                    curve: Curves.easeInOutSine,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(_rounding),
+                      ),
+                      height: constraints.maxWidth,
+                      width: widget.scale *
+                          constraints.maxWidth /
+                          widget.divisions,
+                    )),
               ),
-            // ),
-          ),
-        ));
-  }
+            ),
+            ...List<Widget>.generate(
+                widget.divisions - 1,
+                (i) => Positioned(
+                      left: (i + 1) * constraints.maxWidth / widget.divisions,
+                      child: Container(
+                        width: 2,
+                        height: 5000, //?? Why cant I just constraints.minHeight,
+                        color: Colors.grey.withAlpha(40),
+                      ),
+                    )),
+          ],
+        ),
+      );
 }
