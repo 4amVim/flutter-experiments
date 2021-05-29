@@ -1,4 +1,3 @@
-import 'package:boxy/flex.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -53,12 +52,9 @@ class Page extends StatelessWidget {
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-          ProgressWidget(_counter, height: 50, divisions: 5, width: 5000),
+          Container(height: 15, child: ProgressWidget(_counter, divisions: 5)),
           Text('You have pushed the button this many times:'),
           Text('$_counter', style: Theme.of(context).textTheme.headline4),
-          BoxyRow(
-            children: [],
-          )
         ]));
   }
 }
@@ -70,7 +66,9 @@ class ProgressWidget extends StatefulWidget {
   final int divisions;
 
   ProgressWidget(this.scale,
-      {required this.height, this.divisions = 5, this.width = double.infinity});
+      {required this.divisions,
+      this.height = double.infinity,
+      this.width = double.infinity});
 
   @override
   _ProgressWidgetState createState() => _ProgressWidgetState();
@@ -84,43 +82,34 @@ class _ProgressWidgetState extends State<ProgressWidget>
         builder: (_, constraints) => Stack(
           children: [
             Container(
-              padding: EdgeInsets.zero,
-              width: widget.width,
               height: widget.height,
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
                   color: Colors.grey[300],
                   border: Border.all(color: Colors.grey[400]!, width: 1),
                   borderRadius: BorderRadius.circular(100)),
-              child: Container(
-                height: constraints.maxHeight,
-                alignment: Alignment.centerLeft,
-                child: AnimatedSize(
-                    vsync: this,
-                    duration: Duration(seconds: 2),
-                    curve: Curves.easeInOutSine,
-                    child: Container(
-                      decoration: BoxDecoration(
+              alignment: Alignment.centerLeft,
+              child: AnimatedSize(
+                  vsync: this,
+                  duration: Duration(seconds: 2),
+                  curve: Curves.easeInOutSine,
+                  child: Container(
+                    decoration: BoxDecoration(
                         color: Colors.green,
                         shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(_rounding),
-                      ),
-                      height: constraints.maxWidth,
-                      width: widget.scale *
-                          constraints.maxWidth /
-                          widget.divisions,
-                    )),
-              ),
+                        borderRadius: BorderRadius.circular(_rounding)),
+                    width:
+                        widget.scale * constraints.maxWidth / widget.divisions,
+                  )),
             ),
             ...List<Widget>.generate(
                 widget.divisions - 1,
                 (i) => Positioned(
+                      top: 0,
+                      bottom: 0,
                       left: (i + 1) * constraints.maxWidth / widget.divisions,
-                      child: Container(
-                        width: 2,
-                        height: 5000, //?? Why cant I just constraints.minHeight,
-                        color: Colors.grey.withAlpha(40),
-                      ),
+                      child:
+                          Container(width: 2, color: Colors.grey.withAlpha(40)),
                     )),
           ],
         ),
