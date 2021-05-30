@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'customs.dart';
@@ -5,6 +8,10 @@ import 'customs.dart';
 void main() => runApp(ProviderScope(child: MyApp()));
 
 final myProvider = StateProvider((_) => 0);
+final pageContentProvider = StateProvider((_) => Text(
+      'asd',
+      style: TextStyle(fontSize: 75),
+    ));
 
 class MyApp extends StatelessWidget {
   @override
@@ -45,26 +52,38 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Theme.of(context).canvasColor,
                 elevation: 0,
               ),
-              body: Page(counter: watch(myProvider).state),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => context.read(myProvider).state++,
-                tooltip: 'Increment',
-                child: Icon(Icons.add),
-              ), // This trailing comma makes auto-formatting nicer for build methods.
+              body: PageWidget(counter: watch(myProvider).state),
             ));
   }
 }
 
-class Page extends StatefulWidget {
-  Page({required int counter}) : _counter = counter;
-
-  int _counter;
+class PageWidget extends StatefulWidget {
+  PageWidget({required int counter});
 
   @override
-  _PageState createState() => _PageState();
+  _PageWidgetState createState() => _PageWidgetState();
 }
 
-class _PageState extends State<Page> {
+class _PageWidgetState extends State<PageWidget>
+    with SingleTickerProviderStateMixin {
+  // late final AnimationController _controller = AnimationController(
+  //     duration: const Duration(milliseconds: 1500), vsync: this);
+  // ..repeat(reverse: false);
+
+  // late final Animation<Offset> _offsetAnimation = Tween<Offset>(
+  //   begin: Offset.zero,
+  //   end: const Offset(-3, 0.0),
+  // ).animate(CurvedAnimation(
+  //   parent: _controller,
+  //   curve: Curves.easeInBack,
+  // ));
+
+  @override
+  void dispose() {
+    super.dispose();
+    // _controller.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     print('rebuild Page');
@@ -82,52 +101,55 @@ class _PageState extends State<Page> {
                 Text('You have pushed the button this many times:'),
               ],
             ),
-            Text('${widget._counter}',
+            Text(watch(myProvider).state.toString(),
                 style: Theme.of(context).textTheme.headline4),
+            AnimatedSwitcher(
+              duration: Duration(seconds: 1),
+              transitionBuilder: (child, animation) {
+                String omg =
+                    child.key.toString().replaceAll(RegExp(r'[\]\[<>]*'), '');
+                debugger(when: omg.isNotEmpty);
+                var ok = 0;
+                if (omg != "null") {
+                  ok = int.parse(omg);
+                }
+                print(ok);
+                print(ok.runtimeType);
+
+                return SlideTransition(
+                  position:
+                      Tween<Offset>(begin: Offset(-4, 0), end: Offset.zero)
+                          .animate(CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.fastLinearToSlowEaseIn)),
+                  child: child,
+                );
+              },
+              child: watch(pageContentProvider).state,
+            ),
             Spacer(flex: 50),
             NavigateButton(
                 onPressed: () {
+                  context.read(pageContentProvider).state = Text(
+                    'top button',
+                    key: ValueKey(5),
+                  );
                   context.read(myProvider).state++;
                 },
-                text: 'skip'),
-            NavigateButton(onPressed: () {}, text: 'skip', highlight: false),
+                text: 'Continue'),
+            NavigateButton(
+                onPressed: () {
+                  context.read(pageContentProvider).state = Text(
+                    'bottom button',
+                    key: ValueKey(-5),
+                  );
+
+                  context.read(myProvider).state--;
+                },
+                text: 'skip',
+                highlight: false),
             Spacer(flex: 2)
           ]),
     );
-  }
-}
-
-class NavigateButton extends StatelessWidget {
-  final String text;
-  final highlight;
-  final void Function()? onPressed;
-  NavigateButton(
-      {required this.onPressed, required this.text, this.highlight = true});
-  @override
-  Widget build(BuildContext context) {
-    const txtStyle = TextStyle(fontSize: 15);
-
-    var textStyle =
-        highlight ? txtStyle.copyWith(color: Colors.white) : txtStyle;
-
-    final child = Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-      child: Text(text, style: textStyle),
-    );
-
-    var style = highlight
-        ? ElevatedButton.styleFrom(
-            primary: Colors.deepPurpleAccent,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            elevation: 0,
-          )
-        : TextButton.styleFrom(
-            primary: Colors.deepPurpleAccent,
-          );
-
-    return highlight
-        ? ElevatedButton(onPressed: onPressed, style: style, child: child)
-        : TextButton(onPressed: onPressed, style: style, child: child);
   }
 }

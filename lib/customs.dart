@@ -52,3 +52,41 @@ class _ProgressWidgetState extends State<ProgressWidget>
             ],
           ));
 }
+
+class NavigateButton extends StatelessWidget {
+  final String text;
+  final highlight;
+  final void Function()? onPressed;
+  NavigateButton(
+      {required this.onPressed, required this.text, this.highlight = true});
+  @override
+  Widget build(BuildContext context) {
+    const txtStyle = TextStyle(fontSize: 15);
+
+    var textStyle =
+        highlight ? txtStyle.copyWith(color: Colors.white) : txtStyle;
+
+    final child = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      child: Text(text, style: textStyle),
+    );
+
+    var color = Colors.lightBlue;
+
+    return highlight
+        ? ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+                primary: color,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                elevation: 0),
+            child: child)
+        : TextButton(
+            onPressed: onPressed,
+            style: TextButton.styleFrom(
+              primary: color,
+            ),
+            child: child);
+  }
+}
