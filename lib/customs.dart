@@ -25,8 +25,8 @@ class _ProgressWidgetState extends State<ProgressWidget>
                   height: widget.height,
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      border: Border.all(color: Colors.grey[400]!, width: 1),
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
                       borderRadius: BorderRadius.circular(100)),
                   alignment: Alignment.centerLeft,
                   child: AnimatedContainer(
@@ -44,7 +44,7 @@ class _ProgressWidgetState extends State<ProgressWidget>
                         left: (i + 1) * constraints.maxWidth / widget.divisions,
                         child: ClipRRect(
                           child: Container(
-                            color: Colors.grey.withAlpha(400),
+                            color: Colors.grey.withAlpha(60),
                             width: 2,
                           ),
                         ),
