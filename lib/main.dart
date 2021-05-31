@@ -1,17 +1,12 @@
-import 'dart:developer';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'customs.dart';
 
 void main() => runApp(ProviderScope(child: MyApp()));
 
-final myProvider = StateProvider((_) => 0);
-final pageContentProvider = StateProvider((_) => Text(
-      'asd',
-      style: TextStyle(fontSize: 75),
-    ));
+final pageNumberProvider = StateProvider<int>((_) => 0);
+final isForward = StateProvider<bool>((_) => true);
 
 class MyApp extends StatelessWidget {
   @override
@@ -40,116 +35,126 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Container(
                       height: 15,
                       alignment: Alignment.center,
-                      child: ProgressWidget(watch(myProvider).state,
-                          divisions: 5)),
+                      child: ProgressWidget(watch(pageNumberProvider).state,
+                          divisions: pageList.length)),
                 ),
                 actions: [
                   BackButton(onPressed: () {}, color: Colors.transparent)
                 ],
                 leading: BackButton(
-                    onPressed: () => context.read(myProvider).state--,
+                    onPressed: () {
+                      context.read(isForward).state = false;
+                      watch(pageNumberProvider).state > 0
+                          ? context.read(pageNumberProvider).state--
+                          : null;
+
+                    },
                     color: Colors.black),
                 backgroundColor: Theme.of(context).canvasColor,
                 elevation: 0,
               ),
-              body: PageWidget(counter: watch(myProvider).state),
+              body: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('You have pushed the button this many times:'),
+                      ],
+                    ),
+                    Text(watch(pageNumberProvider).state.toString(),
+                        style: Theme.of(context).textTheme.headline4),
+                    AnimatedSwitcher(
+                        duration: Duration(seconds: 1),
+                        transitionBuilder: (child, animation) {
+                          int currentKey = int.tryParse(child.key
+                                      ?.toString()
+                                      .replaceAll(RegExp(r'[\]\[<>]*'), '') ??
+                                  '') ??
+                              500;
+
+                          //?Convoluted way to ensure the page animates towards the right direction
+                          double currentOffset;
+                          if (watch(isForward).state) {
+                            currentOffset =
+                                watch(pageNumberProvider).state > currentKey
+                                    ? -5.0
+                                    : 5.0;
+                          } else {
+                            currentOffset =
+                                watch(pageNumberProvider).state >= currentKey
+                                    ? -5.0
+                                    : 5.0;
+                          }
+
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                                    begin: Offset(currentOffset, 0),
+                                    end: Offset.zero)
+                                .animate(CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.fastLinearToSlowEaseIn)),
+                            child: child,
+                          );
+                        },
+                        child: pageList[watch(pageNumberProvider).state]),
+                    Spacer(flex: 50),
+                    NavigateButton(
+                        onPressed: () {
+                          context.read(isForward).state = true;
+                          watch(pageNumberProvider).state + 1 < pageList.length
+                              ? context.read(pageNumberProvider).state++
+                              : null;
+                        },
+                        text: 'Continue'),
+                    NavigateButton(
+                        onPressed: () {
+                          context.read(isForward).state = false;
+                          watch(pageNumberProvider).state > 0
+                              ? context.read(pageNumberProvider).state--
+                              : null;
+                        },
+                        text: 'skip',
+                        highlight: false),
+                    Spacer(flex: 2)
+                  ]),
             ));
   }
-}
 
-class PageWidget extends StatefulWidget {
-  PageWidget({required int counter});
-
-  @override
-  _PageWidgetState createState() => _PageWidgetState();
-}
-
-class _PageWidgetState extends State<PageWidget>
-    with SingleTickerProviderStateMixin {
-  // late final AnimationController _controller = AnimationController(
-  //     duration: const Duration(milliseconds: 1500), vsync: this);
-  // ..repeat(reverse: false);
-
-  // late final Animation<Offset> _offsetAnimation = Tween<Offset>(
-  //   begin: Offset.zero,
-  //   end: const Offset(-3, 0.0),
-  // ).animate(CurvedAnimation(
-  //   parent: _controller,
-  //   curve: Curves.easeInBack,
-  // ));
-
-  @override
-  void dispose() {
-    super.dispose();
-    // _controller.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print('rebuild Page');
-    return Consumer(
-      builder: (BuildContext context,
-              T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
-          Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('You have pushed the button this many times:'),
-              ],
-            ),
-            Text(watch(myProvider).state.toString(),
-                style: Theme.of(context).textTheme.headline4),
-            AnimatedSwitcher(
-              duration: Duration(seconds: 1),
-              transitionBuilder: (child, animation) {
-                String omg =
-                    child.key.toString().replaceAll(RegExp(r'[\]\[<>]*'), '');
-                debugger(when: omg.isNotEmpty);
-                var ok = 0;
-                if (omg != "null") {
-                  ok = int.parse(omg);
-                }
-                print(ok);
-                print(ok.runtimeType);
-
-                return SlideTransition(
-                  position:
-                      Tween<Offset>(begin: Offset(-4, 0), end: Offset.zero)
-                          .animate(CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.fastLinearToSlowEaseIn)),
-                  child: child,
-                );
-              },
-              child: watch(pageContentProvider).state,
-            ),
-            Spacer(flex: 50),
-            NavigateButton(
-                onPressed: () {
-                  context.read(pageContentProvider).state = Text(
-                    'top button',
-                    key: ValueKey(5),
-                  );
-                  context.read(myProvider).state++;
-                },
-                text: 'Continue'),
-            NavigateButton(
-                onPressed: () {
-                  context.read(pageContentProvider).state = Text(
-                    'bottom button',
-                    key: ValueKey(-5),
-                  );
-
-                  context.read(myProvider).state--;
-                },
-                text: 'skip',
-                highlight: false),
-            Spacer(flex: 2)
-          ]),
-    );
-  }
+  // A list of the middle content for onboarding pages
+  //! You need to provide a unique value key
+  final List<Widget> pageList = [
+    Container(
+      key: ValueKey(0),
+      // color: Theme.of(context).canvasColor,
+      child: Column(
+        children: const [
+          Text('top button'),
+          Image(image: AssetImage('assets/undraw/bitmap/hiking.png')),
+        ],
+      ),
+    ),
+    Container(
+      key: ValueKey(1),
+      // color: Theme.of(context).canvasColor,
+      child: Column(
+        children: [
+          Text('bottom button'),
+          Image(image: AssetImage('assets/undraw/bitmap/water_bottle.png')),
+        ],
+      ),
+    ),
+    Container(
+      key: ValueKey(2),
+      // color: Theme.of(context).canvasColor,
+      child: Column(
+        children: [
+          Text('bottom button'),
+          Image(image: AssetImage('assets/undraw/bitmap/tracker.png')),
+        ],
+      ),
+    )
+  ];
 }
