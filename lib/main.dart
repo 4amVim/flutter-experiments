@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'customs.dart';
+import 'tape_measure.dart';
 
 void main() => runApp(ProviderScope(child: MyApp()));
 
@@ -136,7 +137,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<Widget> pageList = [
     Container(
       key: ValueKey(0),
-      color:Colors.grey[350],
+      color: Colors.grey[350],
       child: Column(
         children: const [
           Text('top button'),
@@ -160,9 +161,61 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Column(
         children: [
           Text('bottom button'),
-          Image(image: AssetImage('assets/undraw/bitmap/tracker.png')),
+          Container(
+            // color: Colors.red,
+            decoration: BoxDecoration(),
+            clipBehavior: Clip.hardEdge,
+            child: TryingWidget(),
+          )
         ],
       ),
     )
   ];
+}
+
+class TryingWidget extends StatefulWidget {
+  @override
+  _TryingWidgetState createState() => _TryingWidgetState();
+}
+
+class _TryingWidgetState extends State<TryingWidget> {
+  String _debugText = 'Go on do it!';
+  late Offset touchStart;
+  TapeMeasurePaint? tape;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+      width: 500, // double.infinity,
+      height: 500, //double.infinity,
+      child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) =>
+              Stack(children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Tape(
+                      width: constraints.maxWidth / 3,
+                      height: constraints.maxHeight),
+                ),
+                Positioned(
+                    left: constraints.maxWidth / 3,
+                    top: constraints.maxHeight / 2,
+                    right: 0,
+                    child: Text(_debugText,
+                        softWrap: true, style: TextStyle(fontSize: 45))),
+              ]))); //));
+
+  //Returns a vertical tape of specified size
+  Widget Tape({required double width, required double height}) {
+    tape ??= TapeMeasurePaint(width, height);
+    return Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: (details) => touchStart = details.localPosition,
+        onPointerMove: (details) => setState(() {
+              tape!.offsetBy((details.localPosition.dy - touchStart.dy));
+              _debugText = tape!.reading;
+            }),
+        onPointerUp: (_) => tape!.shiftStart(),
+        child: CustomPaint(
+            painter: tape, child: SizedBox(width: width, height: height)));
+  }
 }
