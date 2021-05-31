@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 
 ///Draws a vertical tape measure that gives a measurment [rawReading]
 class TapeMeasurePaint extends CustomPainter {
+  //*Color for the tape's background
+  static const _color = Colors.blue;
+  static const _ticksColor = Colors.black;
+  static const _arrowNotTouchedColor = Color(0xFFFFFFFF);
+  static const _arrowTouchedColor = Color(0xCFFFFFFF);
+  static const _textColor = Colors.red;
+
   ///Instantaneous, scaled offset of the tape
   double _offset = 0;
 
@@ -52,7 +59,7 @@ class TapeMeasurePaint extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas //? Color the background, centre x-axis and do x-translation
-      ..drawRect(Offset.zero & size, Paint()..color = Colors.amber)
+      ..drawRect(Offset.zero & size, Paint()..color = _color)
       ..save() //? We're saving basic state for later when we draw an arrow
       ..translate(size.width, .0) //? Vertically centre the x-axis
       ..translate(0, _start) //? Offset the start (to persist between touches)
@@ -69,7 +76,7 @@ class TapeMeasurePaint extends CustomPainter {
       void tensText(double xOffset, int no) => TextPainter(
           text: TextSpan(
               text: no.toString(),
-              style: TextStyle(fontSize: fontSize, color: Colors.red)),
+              style: TextStyle(fontSize: fontSize, color: _textColor)),
           textDirection: TextDirection.ltr)
         ..layout(minWidth: size.width * 0.2, maxWidth: size.width * 0.8)
         ..paint(cvs, Offset(-0.65 * size.width, xOffset - 0.04 * size.width));
@@ -78,9 +85,10 @@ class TapeMeasurePaint extends CustomPainter {
       //* Draw segments
       cvs.save();
       for (var no = 0; no < howMany; no++) {
-        var black = Paint()..color = Colors.black;
+        var ticksColor = Paint()..color = _ticksColor;
         //* Draw a segment
-        cvs.drawRect(Offset.zero & Size(_oneSize, 0.35 * size.width), black);
+        cvs.drawRect(
+            Offset.zero & Size(_oneSize, 0.35 * size.width), ticksColor);
         cvs.translate(_oneSize, 0);
         if (showText) {
           cvs.rotate(-pi / 2);
@@ -91,7 +99,7 @@ class TapeMeasurePaint extends CustomPainter {
           cvs.drawRect(
               Offset(i * _gapSize + (i - 1) * _tenthSize, 0) &
                   Size(_tenthSize, .15 * size.width),
-              black);
+              ticksColor);
         }
         cvs.translate(10 * _gapSize + 9 * _tenthSize, 0);
       }
@@ -116,11 +124,15 @@ class TapeMeasurePaint extends CustomPainter {
       ..restore()
       ..save()
       //?If user is scrolling, have the arrow slightly more to the right
-      ..translate(_offset == 0 ? -30 : -10, 0)
+      ..translate(-10, 0)
       //?If user is scrolling, have the arrow slightly more opaque
-      ..drawPath(arrowPath,
-          Paint()..color = _offset == 0 ? Color(0xCFFFFFFF) : Color(0xFFFFFFFF))
+      ..drawPath(
+          arrowPath,
+          Paint()
+            ..color =
+                _offset.abs() < 5 ? _arrowNotTouchedColor : _arrowTouchedColor)
       ..restore();
+    print('offset:' + _offset.toString());
   }
 
   @override
