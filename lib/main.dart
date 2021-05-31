@@ -5,23 +5,23 @@ import 'customs.dart';
 
 void main() => runApp(ProviderScope(child: MyApp()));
 
-final pageNumberProvider = StateProvider<int>((_) => 0);
+final pageNumberProvider = StateProvider<int>((_) => 1);
 final isForward = StateProvider<bool>((_) => true);
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage());
+      theme: ThemeData(primarySwatch: Colors.lightBlue),
+      home: OnboardingPage());
 }
 
-class MyHomePage extends StatefulWidget {
+class OnboardingPage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _OnboardingPageState createState() => _OnboardingPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     print('rebuild scaffold');
@@ -39,15 +39,20 @@ class _MyHomePageState extends State<MyHomePage> {
                           divisions: pageList.length)),
                 ),
                 actions: [
-                  BackButton(onPressed: () {}, color: Colors.transparent)
+                  BackButton(
+                      onPressed: null,
+                      color: Colors
+                          .transparent) //This is here just to make sure the progress bar is perfectly centered
                 ],
                 leading: BackButton(
                     onPressed: () {
                       context.read(isForward).state = false;
-                      watch(pageNumberProvider).state > 0
-                          ? context.read(pageNumberProvider).state--
-                          : null;
-
+                      if (watch(pageNumberProvider).state > 1) {
+                        context.read(pageNumberProvider).state--;
+                      } else {
+                        print('should go back to intro page');
+                        //TODO Add a bit here to pop back to the introduction screen
+                      }
                     },
                     color: Colors.black),
                 backgroundColor: Theme.of(context).canvasColor,
@@ -58,11 +63,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('You have pushed the button this many times:'),
-                      ],
+                    Text(
+                      'Step ' +
+                          (watch(pageNumberProvider).state).toString() +
+                          '/${pageList.length}',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
                     ),
                     Text(watch(pageNumberProvider).state.toString(),
                         style: Theme.of(context).textTheme.headline4),
@@ -79,12 +84,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           double currentOffset;
                           if (watch(isForward).state) {
                             currentOffset =
-                                watch(pageNumberProvider).state > currentKey
+                                watch(pageNumberProvider).state - 1 > currentKey
                                     ? -5.0
                                     : 5.0;
                           } else {
                             currentOffset =
-                                watch(pageNumberProvider).state >= currentKey
+                                watch(pageNumberProvider).state - 1 >=
+                                        currentKey
                                     ? -5.0
                                     : 5.0;
                           }
@@ -99,12 +105,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: child,
                           );
                         },
-                        child: pageList[watch(pageNumberProvider).state]),
+                        child: pageList[watch(pageNumberProvider).state - 1]),
                     Spacer(flex: 50),
                     NavigateButton(
                         onPressed: () {
                           context.read(isForward).state = true;
-                          watch(pageNumberProvider).state + 1 < pageList.length
+                          watch(pageNumberProvider).state < pageList.length
                               ? context.read(pageNumberProvider).state++
                               : null;
                         },
@@ -112,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     NavigateButton(
                         onPressed: () {
                           context.read(isForward).state = false;
-                          watch(pageNumberProvider).state > 0
+                          watch(pageNumberProvider).state > 1
                               ? context.read(pageNumberProvider).state--
                               : null;
                         },
