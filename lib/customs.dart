@@ -71,13 +71,13 @@ class NavigateButton extends StatelessWidget {
       child: Text(text, style: textStyle),
     );
 
-    var color = Colors.lightBlue;
+    // Color color = Theme.of(context).primaryColor;
 
     return highlight
         ? ElevatedButton(
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
-                primary: color,
+                // primary: color,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
                 elevation: 0),
@@ -85,8 +85,9 @@ class NavigateButton extends StatelessWidget {
         : TextButton(
             onPressed: onPressed,
             style: TextButton.styleFrom(
-              primary: color,
+              // primary: color,
             ),
+
             child: child);
   }
 }

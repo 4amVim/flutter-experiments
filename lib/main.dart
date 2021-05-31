@@ -67,10 +67,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       'Step ' +
                           (watch(pageNumberProvider).state).toString() +
                           '/${pageList.length}',
-                      style: TextStyle(color: Theme.of(context).primaryColor),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6!
+                          .copyWith(color: Theme.of(context).primaryColor),
                     ),
-                    Text(watch(pageNumberProvider).state.toString(),
-                        style: Theme.of(context).textTheme.headline4),
+                    Spacer(flex: 5),
                     AnimatedSwitcher(
                         duration: Duration(seconds: 1),
                         transitionBuilder: (child, animation) {
@@ -130,11 +132,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   // A list of the middle content for onboarding pages
-  //! You need to provide a unique value key
+  //! You need to keep incrementing the value key
   final List<Widget> pageList = [
     Container(
       key: ValueKey(0),
-      // color: Theme.of(context).canvasColor,
+      color:Colors.grey[350],
       child: Column(
         children: const [
           Text('top button'),
