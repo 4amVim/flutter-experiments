@@ -80,7 +80,6 @@ class TapeMeasurePaint extends CustomPainter {
           textDirection: TextDirection.ltr)
         ..layout(minWidth: size.width * 0.2, maxWidth: size.width * 0.8)
         ..paint(cvs, Offset(-0.65 * size.width, xOffset - 0.04 * size.width));
-      print(size.width * 0.2);
 
       //* Draw segments
       cvs.save();
@@ -132,7 +131,6 @@ class TapeMeasurePaint extends CustomPainter {
             ..color =
                 _offset.abs() < 15 ? _arrowNotTouchedColor : _arrowTouchedColor)
       ..restore();
-    print('offset:' + _offset.toString());
   }
 
   @override

@@ -161,10 +161,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Column(
         children: [
           Text('bottom button'),
-          Container(
-            color: Colors.white,
-            child: TryingWidget(),
-          )
+          TryingWidget()
         ],
       ),
     )
@@ -188,8 +185,7 @@ class _TryingWidgetState extends State<TryingWidget> {
       child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) =>
               Stack(children: [
-                Align(
-                  alignment: Alignment.centerLeft,
+                Positioned(
                   child: Tape(
                       width: constraints.maxWidth / 3,
                       height: constraints.maxHeight),
@@ -197,7 +193,6 @@ class _TryingWidgetState extends State<TryingWidget> {
                 Positioned(
                     left: constraints.maxWidth / 3,
                     top: constraints.maxHeight / 2,
-                    right: 0,
                     child: Text(_debugText,
                         softWrap: true, style: TextStyle(fontSize: 45))),
               ]))); //));
