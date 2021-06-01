@@ -146,8 +146,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
     ),
     Container(
+      color: Colors.white,
       key: ValueKey(1),
-      // color: Theme.of(context).canvasColor,
       child: Column(
         children: [
           Text('bottom button'),
@@ -162,9 +162,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         children: [
           Text('bottom button'),
           Container(
-            // color: Colors.red,
-            decoration: BoxDecoration(),
-            clipBehavior: Clip.hardEdge,
+            color: Colors.white,
             child: TryingWidget(),
           )
         ],
@@ -210,10 +208,12 @@ class _TryingWidgetState extends State<TryingWidget> {
     return Listener(
         behavior: HitTestBehavior.opaque,
         onPointerDown: (details) => touchStart = details.localPosition,
-        onPointerMove: (details) => setState(() {
-              tape!.offsetBy((details.localPosition.dy - touchStart.dy));
+        onPointerMove: (details) {
+            setState(() {
+              tape!.offsetBy(details.localPosition.dy - touchStart.dy);
               _debugText = tape!.reading;
-            }),
+            });
+        },
         onPointerUp: (_) => tape!.shiftStart(),
         child: CustomPaint(
             painter: tape, child: SizedBox(width: width, height: height)));

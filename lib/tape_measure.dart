@@ -130,7 +130,7 @@ class TapeMeasurePaint extends CustomPainter {
           arrowPath,
           Paint()
             ..color =
-                _offset.abs() < 5 ? _arrowNotTouchedColor : _arrowTouchedColor)
+                _offset.abs() < 15 ? _arrowNotTouchedColor : _arrowTouchedColor)
       ..restore();
     print('offset:' + _offset.toString());
   }
