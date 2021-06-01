@@ -76,6 +76,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Spacer(flex: 5),
                     AnimatedSwitcher(
                         duration: Duration(seconds: 1),
+                        // layoutBuilder: (Widget? chil, List<Widget> koko) {
+                        //   print('ads');
+                        //   return RepaintBoundary(
+                        //     // color: Colors.red,
+                        //     // width: 500,
+                        //     // height: 50,
+                        //     child: chil,
+                        //   );
+                        // },
                         transitionBuilder: (child, animation) {
                           int currentKey = int.tryParse(child.key
                                       ?.toString()
@@ -157,11 +166,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
     ),
     Container(
       key: ValueKey(2),
-      // color: Theme.of(context).canvasColor,
+      color: Colors.white,
       child: Column(
         children: [
           Text('bottom button'),
-          TryingWidget()
+          Container(
+            decoration: BoxDecoration(),
+            clipBehavior: Clip.hardEdge,
+            child: TryingWidget(
+              isRetardUnits: true,
+            ),
+          )
         ],
       ),
     )
@@ -169,6 +184,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 }
 
 class TryingWidget extends StatefulWidget {
+  final bool isRetardUnits;
+
+  const TryingWidget({Key? key, this.isRetardUnits = false}) : super(key: key);
+
   @override
   _TryingWidgetState createState() => _TryingWidgetState();
 }
@@ -178,39 +197,58 @@ class _TryingWidgetState extends State<TryingWidget> {
   late Offset touchStart;
   TapeMeasurePaint? tape;
 
+  bool _isRetardUnits = false; //widget.isRetardUnits;
   @override
   Widget build(BuildContext context) => SizedBox(
       width: 500, // double.infinity,
       height: 500, //double.infinity,
       child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) =>
-              Stack(children: [
-                Positioned(
-                  child: Tape(
-                      width: constraints.maxWidth / 3,
-                      height: constraints.maxHeight),
-                ),
-                Positioned(
-                    left: constraints.maxWidth / 3,
-                    top: constraints.maxHeight / 2,
-                    child: Text(_debugText,
-                        softWrap: true, style: TextStyle(fontSize: 45))),
-              ]))); //));
+          builder: (BuildContext context, BoxConstraints constraints) {
+        var width = constraints.maxWidth / 3;
+        var height = constraints.maxHeight;
+        tape ??= TapeMeasurePaint(width, height);
 
-  //Returns a vertical tape of specified size
-  Widget Tape({required double width, required double height}) {
-    tape ??= TapeMeasurePaint(width, height);
-    return Listener(
-        behavior: HitTestBehavior.opaque,
-        onPointerDown: (details) => touchStart = details.localPosition,
-        onPointerMove: (details) {
-            setState(() {
-              tape!.offsetBy(details.localPosition.dy - touchStart.dy);
-              _debugText = tape!.reading;
-            });
-        },
-        onPointerUp: (_) => tape!.shiftStart(),
-        child: CustomPaint(
-            painter: tape, child: SizedBox(width: width, height: height)));
-  }
+        return Stack(
+          children: [
+            //? This paints the tape-measure
+            Positioned(
+              left: constraints.maxWidth / 8,
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (details) => touchStart = details.localPosition,
+                onPointerMove: (details) => setState(() {
+                  tape!.offsetBy(details.localPosition.dy - touchStart.dy);
+                  double inches = (double.parse(tape!.reading) / 2.54);
+                  _debugText = _isRetardUnits
+                      ? '${inches ~/ 12}feet ${(inches % 12).toStringAsFixed(1)}in'
+                      : '${tape!.reading} cm';
+                }),
+                onPointerUp: (_) => tape!.shiftStart(),
+                child: CustomPaint(
+                    willChange: true,
+                    painter: tape,
+                    child: SizedBox(width: width, height: height)),
+              ),
+            ),
+            //? This writes the text
+            Positioned(
+                left: 8 * constraints.maxWidth / 15,
+                top: constraints.maxHeight / 2,
+                child: Text(_debugText,
+                    softWrap: true,
+                    style: Theme.of(context).textTheme.headline5)),
+            Positioned(
+              left: 8 * constraints.maxWidth / 15,
+              child: NavigateButton(
+                text: 'flip unit',
+                onPressed: () {
+                  setState(() {
+                    _isRetardUnits = !_isRetardUnits;
+                  });
+                },
+              ),
+            )
+          ],
+        );
+      })); //));
 }

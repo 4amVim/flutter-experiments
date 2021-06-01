@@ -52,7 +52,7 @@ class TapeMeasurePaint extends CustomPainter {
   // double get _offset => _rawOffset / _unit;
 
   double get _start {
-    if (_rawStart == 0) _rawStart = -7963 * _unit * _unit;
+    if (_rawStart == 0) _rawStart = -13875 * _unit * _unit;
     return _rawStart / _unit;
   }
 
