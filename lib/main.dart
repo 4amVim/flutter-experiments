@@ -24,126 +24,85 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   @override
-  Widget build(BuildContext context) {
-    print('rebuild scaffold');
-    return Consumer(
-        builder: (BuildContext context,
-                T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
-            Scaffold(
-              appBar: AppBar(
-                title: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                      height: 15,
-                      alignment: Alignment.center,
-                      child: ProgressWidget(watch(pageNumberProvider).state,
-                          divisions: pageList.length)),
-                ),
-                actions: [
-                  BackButton(
-                      onPressed: null,
-                      color: Colors
-                          .transparent) //This is here just to make sure the progress bar is perfectly centered
-                ],
-                leading: BackButton(
-                    onPressed: () {
-                      context.read(isForward).state = false;
-                      if (watch(pageNumberProvider).state > 1) {
-                        context.read(pageNumberProvider).state--;
-                      } else {
-                        print('should go back to intro page');
-                        //TODO Add a bit here to pop back to the introduction screen
-                      }
-                    },
-                    color: Colors.black),
-                backgroundColor: Theme.of(context).canvasColor,
-                elevation: 0,
+  Widget build(BuildContext context) => Consumer(
+      builder: (BuildContext context,
+              T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
+          Scaffold(
+            appBar: AppBar(
+              title: Align(
+                alignment: Alignment.center,
+                child: Container(
+                    height: 15,
+                    alignment: Alignment.center,
+                    child: ProgressWidget(watch(pageNumberProvider).state,
+                        divisions: ContentSwitcher.pageList.length)),
               ),
-              body: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text(
-                      'Step ' +
-                          (watch(pageNumberProvider).state).toString() +
-                          '/${pageList.length}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6!
-                          .copyWith(color: Theme.of(context).primaryColor),
-                    ),
-                    Spacer(flex: 5),
-                    AnimatedSwitcher(
-                        duration: Duration(seconds: 1),
-                        // layoutBuilder: (Widget? chil, List<Widget> koko) {
-                        //   print('ads');
-                        //   return RepaintBoundary(
-                        //     // color: Colors.red,
-                        //     // width: 500,
-                        //     // height: 50,
-                        //     child: chil,
-                        //   );
-                        // },
-                        transitionBuilder: (child, animation) {
-                          int currentKey = int.tryParse(child.key
-                                      ?.toString()
-                                      .replaceAll(RegExp(r'[\]\[<>]*'), '') ??
-                                  '') ??
-                              500;
+              actions: [
+                BackButton(
+                    onPressed: null,
+                    color: Colors
+                        .transparent) //This is here just to make sure the progress bar is perfectly centered
+              ],
+              leading: BackButton(
+                  onPressed: () {
+                    context.read(isForward).state = false;
+                    if (watch(pageNumberProvider).state > 1) {
+                      context.read(pageNumberProvider).state--;
+                    } else {
+                      print('should go back to intro page');
+                      //TODO Add a bit here to pop back to the introduction screen
+                    }
+                  },
+                  color: Colors.black),
+              backgroundColor: Theme.of(context).canvasColor,
+              elevation: 0,
+            ),
+            body: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text(
+                    'Step ' +
+                        (watch(pageNumberProvider).state).toString() +
+                        '/${ContentSwitcher.pageList.length}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6!
+                        .copyWith(color: Theme.of(context).primaryColor),
+                  ),
+                  Spacer(flex: 5),
+                  Expanded(
+                      flex: 150,
+                      child: SizedBox.expand(child: ContentSwitcher())),
+                  Spacer(flex: 50),
+                  NavigateButton(
+                      onPressed: () {
+                        context.read(isForward).state = true;
+                        watch(pageNumberProvider).state <
+                                ContentSwitcher.pageList.length
+                            ? context.read(pageNumberProvider).state++
+                            : null;
+                      },
+                      text: 'Continue'),
+                  NavigateButton(
+                      onPressed: () {
+                        context.read(isForward).state = false;
+                        watch(pageNumberProvider).state > 1
+                            ? context.read(pageNumberProvider).state--
+                            : null;
+                      },
+                      text: 'skip',
+                      highlight: false),
+                  Spacer(flex: 2)
+                ]),
+          ));
+}
 
-                          //?Convoluted way to ensure the page animates towards the right direction
-                          double currentOffset;
-                          if (watch(isForward).state) {
-                            currentOffset =
-                                watch(pageNumberProvider).state - 1 > currentKey
-                                    ? -5.0
-                                    : 5.0;
-                          } else {
-                            currentOffset =
-                                watch(pageNumberProvider).state - 1 >=
-                                        currentKey
-                                    ? -5.0
-                                    : 5.0;
-                          }
-
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                                    begin: Offset(currentOffset, 0),
-                                    end: Offset.zero)
-                                .animate(CurvedAnimation(
-                                    parent: animation,
-                                    curve: Curves.fastLinearToSlowEaseIn)),
-                            child: child,
-                          );
-                        },
-                        child: pageList[watch(pageNumberProvider).state - 1]),
-                    Spacer(flex: 50),
-                    NavigateButton(
-                        onPressed: () {
-                          context.read(isForward).state = true;
-                          watch(pageNumberProvider).state < pageList.length
-                              ? context.read(pageNumberProvider).state++
-                              : null;
-                        },
-                        text: 'Continue'),
-                    NavigateButton(
-                        onPressed: () {
-                          context.read(isForward).state = false;
-                          watch(pageNumberProvider).state > 1
-                              ? context.read(pageNumberProvider).state--
-                              : null;
-                        },
-                        text: 'skip',
-                        highlight: false),
-                    Spacer(flex: 2)
-                  ]),
-            ));
-  }
-
-  // A list of the middle content for onboarding pages
-  //! You need to keep incrementing the value key
-  final List<Widget> pageList = [
+class ContentSwitcher extends StatefulWidget {
+  @override
+  _ContentSwitcherState createState() => _ContentSwitcherState();
+  static final List<Widget> pageList = [
     Container(
       key: ValueKey(0),
       color: Colors.grey[350],
@@ -174,20 +133,86 @@ class _OnboardingPageState extends State<OnboardingPage> {
             decoration: BoxDecoration(),
             clipBehavior: Clip.hardEdge,
             child: TryingWidget(
-              isRetardUnits: true,
-            ),
+                // isRetardUnits: true,
+                ),
           )
         ],
       ),
-    )
+    ),
   ];
 }
 
+class _ContentSwitcherState extends State<ContentSwitcher>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  @override
+  void initState() {
+    super.initState();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 1));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var _animation = CurvedAnimation(
+        parent: _animationController, curve: Curves.fastLinearToSlowEaseIn);
+    return Consumer(
+      builder: (BuildContext context,
+          T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) {
+        print('asdsad');
+        // //?Convoluted way to ensure the page animates towards the right direction
+        double currentOffset;
+
+        int currentKey = int.tryParse(
+                child?.key.toString().replaceAll(RegExp(r'[\]\[<>]*'), '') ??
+                    '') ??
+            500;
+        print(currentKey);
+
+        if (watch(isForward).state) {
+          currentOffset =
+              watch(pageNumberProvider).state - 1 > currentKey ? -5.0 : 5.0;
+        } else {
+          currentOffset =
+              watch(pageNumberProvider).state - 1 >= currentKey ? -5.0 : 5.0;
+        }
+        return Container(
+          color: Colors.green,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                    color: Colors.blue,
+                  ),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                            begin: Offset(/*currentOffset*/ 0, 0),
+                            end: Offset.zero)
+                        .animate(_animation),
+                    child: ContentSwitcher.pageList[
+                        watch(pageNumberProvider).state - 1], //  child,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      // child: ContentSwitcher.pageList[watch(pageNumberProvider).state - 1]
+    );
+  }
+}
+
 class TryingWidget extends StatefulWidget {
-  final bool isRetardUnits;
-
-  const TryingWidget({Key? key, this.isRetardUnits = false}) : super(key: key);
-
   @override
   _TryingWidgetState createState() => _TryingWidgetState();
 }
