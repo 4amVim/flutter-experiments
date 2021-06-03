@@ -7,7 +7,6 @@ import 'tape_measure.dart';
 void main() => runApp(ProviderScope(child: MyApp()));
 
 final pageNumberProvider = StateProvider<int>((_) => 1);
-final isForward = StateProvider<bool>((_) => true);
 
 class MyApp extends StatelessWidget {
   @override
@@ -45,7 +44,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ],
               leading: BackButton(
                   onPressed: () {
-                    context.read(isForward).state = false;
                     if (watch(pageNumberProvider).state > 1) {
                       context.read(pageNumberProvider).state--;
                     } else {
@@ -74,11 +72,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   Spacer(flex: 5),
                   Expanded(
                       flex: 150,
-                      child: SizedBox.expand(child: ContentSwitcher())),
+                      child: SizedBox.expand(
+                        child: Container(
+                          color: Colors.purpleAccent,
+                          padding: EdgeInsets.all(5),
+                          child: ContentSwitcher(),
+                        ),
+                      )),
                   Spacer(flex: 50),
                   NavigateButton(
                       onPressed: () {
-                        context.read(isForward).state = true;
                         watch(pageNumberProvider).state <
                                 ContentSwitcher.pageList.length
                             ? context.read(pageNumberProvider).state++
@@ -87,7 +90,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       text: 'Continue'),
                   NavigateButton(
                       onPressed: () {
-                        context.read(isForward).state = false;
                         watch(pageNumberProvider).state > 1
                             ? context.read(pageNumberProvider).state--
                             : null;
@@ -123,18 +125,19 @@ class ContentSwitcher extends StatefulWidget {
         ],
       ),
     ),
-    Container(
-      key: ValueKey(2),
-      color: Colors.white,
+    ConstrainedBox(
+      constraints: BoxConstraints.expand(),
       child: Column(
+        mainAxisSize: MainAxisSize.max,
         children: [
           Text('bottom button'),
-          Container(
-            decoration: BoxDecoration(),
-            clipBehavior: Clip.hardEdge,
-            child: TryingWidget(
-                // isRetardUnits: true,
-                ),
+          Expanded(
+            flex: 1,
+            child: Container(
+              decoration: BoxDecoration(),
+              clipBehavior: Clip.hardEdge,
+              child: TryingWidget(),
+            ),
           )
         ],
       ),
@@ -144,12 +147,13 @@ class ContentSwitcher extends StatefulWidget {
 
 class _ContentSwitcherState extends State<ContentSwitcher>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _animationController;
+
   @override
   void initState() {
     super.initState();
     _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 1));
+        AnimationController(vsync: this, duration: Duration(seconds: 1)) //;
+          ..repeat(reverse: true);
   }
 
   @override
@@ -158,6 +162,7 @@ class _ContentSwitcherState extends State<ContentSwitcher>
     super.dispose();
   }
 
+  late final AnimationController _animationController;
   @override
   Widget build(BuildContext context) {
     var _animation = CurvedAnimation(
@@ -175,36 +180,48 @@ class _ContentSwitcherState extends State<ContentSwitcher>
             500;
         print(currentKey);
 
-        if (watch(isForward).state) {
+        if ('isForward'.isNotEmpty) {
           currentOffset =
               watch(pageNumberProvider).state - 1 > currentKey ? -5.0 : 5.0;
         } else {
           currentOffset =
               watch(pageNumberProvider).state - 1 >= currentKey ? -5.0 : 5.0;
         }
-        return Container(
-          color: Colors.green,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    color: Colors.blue,
-                  ),
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: Offset(/*currentOffset*/ 0, 0),
-                            end: Offset.zero)
-                        .animate(_animation),
-                    child: ContentSwitcher.pageList[
-                        watch(pageNumberProvider).state - 1], //  child,
-                  ),
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  color: Colors.red,
+                ),
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                          begin: Offset(-currentOffset, 0), end: Offset.zero)
+                      .animate(_animation),
+                  child: ContentSwitcher
+                      .pageList[watch(pageNumberProvider).state - 1], //  child,
                 ),
               ),
-            ],
-          ),
+            ),
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  color: Colors.blue,
+                ),
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                          begin: Offset(currentOffset, 0), end: Offset.zero)
+                      .animate(_animation),
+                  child: ContentSwitcher
+                      .pageList[watch(pageNumberProvider).state - 1], //  child,
+                ),
+              ),
+            ),
+          ],
         );
       },
       // child: ContentSwitcher.pageList[watch(pageNumberProvider).state - 1]
@@ -224,18 +241,19 @@ class _TryingWidgetState extends State<TryingWidget> {
 
   bool _isRetardUnits = false; //widget.isRetardUnits;
   @override
-  Widget build(BuildContext context) => SizedBox(
-      width: 500, // double.infinity,
-      height: 500, //double.infinity,
-      child: LayoutBuilder(
+  Widget build(BuildContext context) => LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
+        print(
+            'Max Width: ${constraints.maxWidth} and Max Height: ${constraints.maxHeight}');
         var width = constraints.maxWidth / 3;
         var height = constraints.maxHeight;
         tape ??= TapeMeasurePaint(width, height);
 
         return Stack(
+          fit: StackFit.expand,
           children: [
             //? This paints the tape-measure
+
             Positioned(
               left: constraints.maxWidth / 8,
               child: Listener(
@@ -250,9 +268,10 @@ class _TryingWidgetState extends State<TryingWidget> {
                 }),
                 onPointerUp: (_) => tape!.shiftStart(),
                 child: CustomPaint(
-                    willChange: true,
-                    painter: tape,
-                    child: SizedBox(width: width, height: height)),
+                  willChange: true,
+                  painter: tape,
+                  child: SizedBox(width: width, height: height),
+                ),
               ),
             ),
             //? This writes the text
@@ -275,5 +294,5 @@ class _TryingWidgetState extends State<TryingWidget> {
             )
           ],
         );
-      })); //));
+      }); //));
 }
