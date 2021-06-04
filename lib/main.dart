@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -26,10 +25,11 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller =
-      AnimationController(vsync: this, duration: Duration(milliseconds: 700));
-  // ..repeat(reverse: true);
+      AnimationController(vsync: this, duration: Duration(milliseconds: 900));
   late final CurvedAnimation _animation = CurvedAnimation(
-      parent: _controller, curve: Curves.fastLinearToSlowEaseIn);
+      parent: _controller,
+      curve: Curves.easeInCirc,
+      reverseCurve: Curves.easeOutCirc);
 
   @override
   void dispose() {
@@ -41,11 +41,7 @@ class _OnboardingPageState extends State<OnboardingPage>
   Widget _curr = pageList.first;
   Widget _next = pageList[1];
   @override
-  Widget build(BuildContext context) {
-    print('initialized');
-
-    int pagenum = context.read(_pageNum).state;
-    return Consumer(
+  Widget build(BuildContext context) => Consumer(
         builder: (BuildContext context,
                 T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
             Scaffold(
@@ -96,28 +92,18 @@ class _OnboardingPageState extends State<OnboardingPage>
                         flex: 150,
                         child: Stack(
                           children: [
-                            // Positioned.fill(
-                            //   child: SlideTransition(
-                            //     position: Tween<Offset>(
-                            //             end: Offset(-1, 0),
-                            //             begin: _controller.status ==
-                            //                     AnimationStatus.reverse
-                            //                 ? Offset.zero
-                            //                 : Offset(-1, 0))
-                            //         .animate(CurvedAnimation(
-                            //             parent: _controller,
-                            //             curve: Curves.easeInCirc,
-                            //             reverseCurve: Curves.easeOutCirc)),
-                            //     child: RepaintBoundary(
-                            //       child: Container(
-                            //           color: Colors.blue,
-                            //           child: Opacity(
-                            //             opacity: 0.3,
-                            //             child: _prev,
-                            //           )),
-                            //     ), //  child,
-                            //   ),
-                            // ),
+                            Positioned.fill(
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                        end: Offset(-1, 0),
+                                        begin: _controller.status ==
+                                                AnimationStatus.reverse
+                                            ? Offset.zero
+                                            : Offset(-1, 0))
+                                    .animate(_animation),
+                                child: RepaintBoundary(child: _prev), //  child,
+                              ),
+                            ),
                             Positioned.fill(
                               child: SlideTransition(
                                 position: Tween<Offset>(
@@ -139,106 +125,67 @@ class _OnboardingPageState extends State<OnboardingPage>
                                                     ? 0
                                                     : 0,
                                             0))
-                                    .animate(CurvedAnimation(
-                                        parent: _controller,
-                                        curve: Curves.easeInCirc,
-                                        reverseCurve: Curves.easeOutCirc)),
-                                child: RepaintBoundary(
-                                  child: Container(
-                                      color: Colors.green,
-                                      child: Opacity(
-                                        opacity: 0.3,
-                                        child: _curr,
-                                      )),
-                                ), //  child,
+                                    .animate(_animation),
+                                child: RepaintBoundary(child: _curr), //  child,
                               ),
                             ),
-                            // Positioned.fill(
-                            //   child: SlideTransition(
-                            //     position: Tween<Offset>(
-                            //             begin: Offset(1, 0),
-                            //             end: _controller.status ==
-                            //                     AnimationStatus.forward
-                            //                 ? Offset.zero
-                            //                 : Offset(1, 0))
-                            //         .animate(CurvedAnimation(
-                            //             parent: _controller,
-                            //             curve: Curves.easeOutSine,
-                            //             reverseCurve: Curves.easeOutCirc)),
-                            //     child: Container(
-                            //         color: Colors.red,
-                            //         child: Opacity(
-                            //           opacity: 0.3,
-                            //           child: _next,
-                            //         )),
-                            //   ),
-                            // ),
+                            Positioned.fill(
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                        begin: Offset(1, 0),
+                                        end: _controller.status ==
+                                                AnimationStatus.forward
+                                            ? Offset.zero
+                                            : Offset(1, 0))
+                                    .animate(_animation),
+                                child: RepaintBoundary(child: _next),
+                              ),
+                            ),
                           ],
                         )),
                     Spacer(flex: 50),
                     NavigateButton(
                         onPressed: () {
-                          print('im here');
                           var pageNum = context.read(_pageNum).state;
-                          print('current page $pageNum');
                           if (pageNum < pageList.length - 1) {
                             watch(_pageNum).state++;
                             pageNum++;
-                            print('increased $pageNum');
                             _controller.forward(from: 0).then((value) {
                               setState(() {
-                                // debugger();
                                 _prev = pageList[pageNum - 1];
-                                // debugger();
                                 _curr = pageList[pageNum];
-                                // debugger();
-                                print('chenged ');
                                 if (++pageNum < pageList.length) {
                                   _next = pageList[pageNum];
-                                  print('set next to $pageNum');
-                                  // debugger();
                                 }
                                 _controller.reset();
                               });
                             });
                           }
-                          print('-----------------------------');
                         },
                         text: 'Continue'),
                     NavigateButton(
                         onPressed: () {
-                          print('im here');
                           var pageNum = context.read(_pageNum).state;
-                          print('current page $pageNum');
                           if (pageNum > 0) {
                             watch(_pageNum).state--;
                             pageNum--;
-                            print('decreased $pageNum');
                             _controller.reverse(from: 1).then((value) {
-                              // debugger();
                               setState(() {
                                 _next = pageList[pageNum + 1];
-                                // debugger();
                                 _curr = pageList[pageNum];
-                                // debugger();
-                                print('chenged ');
                                 if (--pageNum > 0) {
                                   _prev = pageList[pageNum - 1];
-                                  print('set prev to $pageNum');
-                                  // debugger();
                                 }
                                 _controller.reset();
                               });
                             });
                           }
-                          print('-----------------------------');
                         },
                         text: 'skip',
                         highlight: false),
                     Spacer(flex: 2)
                   ]),
             ));
-  }
 
   static final List<Widget> pageList = [
     Container(
