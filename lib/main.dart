@@ -94,82 +94,86 @@ class _OnboardingPageState extends State<OnboardingPage>
                     Spacer(flex: 5),
                     Expanded(
                         flex: 150,
-                        child: AnimatedBuilder(
-                          animation: _controller,
-                          builder: (_, __) => Stack(
-                            children: [
-                              Positioned.fill(
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                          begin: Offset(-1, 0),
-                                          end: _controller.status ==
-                                                  AnimationStatus.reverse
-                                              ? Offset.zero
-                                              : Offset(-1, 0))
-                                      .animate(CurvedAnimation(
-                                          parent: _controller,
-                                          curve: Curves.easeInCirc,
-                                          reverseCurve: Curves.easeOutCirc)),
-                                  child: RepaintBoundary(
-                                    child: Container(
-                                        color: Colors.blue,
-                                        child: Opacity(
-                                          opacity: 0.3,
-                                          child: _prev,
-                                        )),
-                                  ), //  child,
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                          begin: Offset.zero,
-                                          end: Offset(
-                                              _controller.status ==
-                                                      AnimationStatus.forward
-                                                  ? -1
-                                                  : _controller.status ==
-                                                          AnimationStatus
-                                                              .reverse
-                                                      ? 1
-                                                      : 0,
-                                              0))
-                                      .animate(CurvedAnimation(
-                                          parent: _controller,
-                                          curve: Curves.easeInCirc,
-                                          reverseCurve: Curves.easeOutCirc)),
-                                  child: RepaintBoundary(
-                                    child: Container(
-                                        color: Colors.green,
-                                        child: Opacity(
-                                          opacity: 0.3,
-                                          child: _curr,
-                                        )),
-                                  ), //  child,
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                          begin: Offset(1, 0),
-                                          end: _controller.status ==
-                                                  AnimationStatus.forward
-                                              ? Offset.zero
-                                              : Offset(1, 0))
-                                      .animate(CurvedAnimation(
-                                          parent: _controller,
-                                          curve: Curves.easeOutSine,
-                                          reverseCurve: Curves.easeOutCirc)),
+                        child: Stack(
+                          children: [
+                            // Positioned.fill(
+                            //   child: SlideTransition(
+                            //     position: Tween<Offset>(
+                            //             end: Offset(-1, 0),
+                            //             begin: _controller.status ==
+                            //                     AnimationStatus.reverse
+                            //                 ? Offset.zero
+                            //                 : Offset(-1, 0))
+                            //         .animate(CurvedAnimation(
+                            //             parent: _controller,
+                            //             curve: Curves.easeInCirc,
+                            //             reverseCurve: Curves.easeOutCirc)),
+                            //     child: RepaintBoundary(
+                            //       child: Container(
+                            //           color: Colors.blue,
+                            //           child: Opacity(
+                            //             opacity: 0.3,
+                            //             child: _prev,
+                            //           )),
+                            //     ), //  child,
+                            //   ),
+                            // ),
+                            Positioned.fill(
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                        begin: Offset(
+                                            _controller.status ==
+                                                    AnimationStatus.forward
+                                                ? 0
+                                                : _controller.status ==
+                                                        AnimationStatus.reverse
+                                                    ? 1
+                                                    : 0,
+                                            0),
+                                        end: Offset(
+                                            _controller.status ==
+                                                    AnimationStatus.forward
+                                                ? -1
+                                                : _controller.status ==
+                                                        AnimationStatus.reverse
+                                                    ? 0
+                                                    : 0,
+                                            0))
+                                    .animate(CurvedAnimation(
+                                        parent: _controller,
+                                        curve: Curves.easeInCirc,
+                                        reverseCurve: Curves.easeOutCirc)),
+                                child: RepaintBoundary(
                                   child: Container(
-                                      color: Colors.red,
+                                      color: Colors.green,
                                       child: Opacity(
                                         opacity: 0.3,
-                                        child: _next,
+                                        child: _curr,
                                       )),
-                                ),
+                                ), //  child,
                               ),
-                            ],
-                          ),
+                            ),
+                            // Positioned.fill(
+                            //   child: SlideTransition(
+                            //     position: Tween<Offset>(
+                            //             begin: Offset(1, 0),
+                            //             end: _controller.status ==
+                            //                     AnimationStatus.forward
+                            //                 ? Offset.zero
+                            //                 : Offset(1, 0))
+                            //         .animate(CurvedAnimation(
+                            //             parent: _controller,
+                            //             curve: Curves.easeOutSine,
+                            //             reverseCurve: Curves.easeOutCirc)),
+                            //     child: Container(
+                            //         color: Colors.red,
+                            //         child: Opacity(
+                            //           opacity: 0.3,
+                            //           child: _next,
+                            //         )),
+                            //   ),
+                            // ),
+                          ],
                         )),
                     Spacer(flex: 50),
                     NavigateButton(
@@ -177,7 +181,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                           print('im here');
                           var pageNum = context.read(_pageNum).state;
                           print('current page $pageNum');
-                          if (pageNum < pageList.length-1) {
+                          if (pageNum < pageList.length - 1) {
                             watch(_pageNum).state++;
                             pageNum++;
                             print('increased $pageNum');
@@ -210,7 +214,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                             watch(_pageNum).state--;
                             pageNum--;
                             print('decreased $pageNum');
-                            _controller.reverse(from: 0).then((value) {
+                            _controller.reverse(from: 1).then((value) {
                               // debugger();
                               setState(() {
                                 _next = pageList[pageNum + 1];
