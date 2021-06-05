@@ -7,7 +7,7 @@ import 'tape_measure.dart';
 
 void main() => runApp(ProviderScope(child: MyApp()));
 
-final _pageNum = StateProvider<int>((_) => 0);
+final _pageNum = StateProvider<int>((_) => 1);
 
 class MyApp extends StatelessWidget {
   @override
@@ -28,8 +28,8 @@ class _OnboardingPageState extends State<OnboardingPage>
       AnimationController(vsync: this, duration: Duration(milliseconds: 900));
   late final CurvedAnimation _animation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInCirc,
-      reverseCurve: Curves.easeOutCirc);
+      curve: Curves.easeInOutCirc,
+      reverseCurve: Curves.easeOutCirc.flipped);
 
   @override
   void dispose() {
@@ -42,150 +42,154 @@ class _OnboardingPageState extends State<OnboardingPage>
   Widget _next = pageList[1];
   @override
   Widget build(BuildContext context) => Consumer(
-        builder: (BuildContext context,
-                T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
-            Scaffold(
-              appBar: AppBar(
-                title: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                      height: 15,
-                      alignment: Alignment.center,
-                      child: ProgressWidget(watch(_pageNum).state,
-                          divisions: pageList.length)),
-                ),
-                actions: [
-                  BackButton(
-                      onPressed: null,
-                      color: Colors
-                          .transparent) //This is here just to make sure the progress bar is perfectly centered
-                ],
-                leading: BackButton(
-                    onPressed: () {
-                      if (watch(_pageNum).state > 1) {
-                        context.read(_pageNum).state--;
-                      } else {
-                        print('should go back to intro page');
-                        //TODO Add a bit here to pop back to the introduction screen
-                      }
-                    },
-                    color: Colors.black),
-                backgroundColor: Theme.of(context).canvasColor,
-                elevation: 0,
+      builder: (BuildContext context,
+              T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
+          Scaffold(
+            appBar: AppBar(
+              title: Align(
+                alignment: Alignment.center,
+                child: Container(
+                    height: 15,
+                    alignment: Alignment.center,
+                    child: ProgressWidget(watch(_pageNum).state,
+                        divisions: pageList.length)),
               ),
-              body: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text(
-                      'Step ' +
-                          (watch(_pageNum).state).toString() +
-                          '/${pageList.length}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6!
-                          .copyWith(color: Theme.of(context).primaryColor),
-                    ),
-                    Spacer(flex: 5),
-                    Expanded(
-                        flex: 150,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                        end: Offset(-1, 0),
-                                        begin: _controller.status ==
-                                                AnimationStatus.reverse
-                                            ? Offset.zero
-                                            : Offset(-1, 0))
-                                    .animate(_animation),
-                                child: RepaintBoundary(child: _prev), //  child,
-                              ),
+              actions: [
+                BackButton(
+                    onPressed: null,
+                    color: Colors
+                        .transparent) //This is here just to make sure the progress bar is perfectly centered
+              ],
+              leading: BackButton(
+                  onPressed: () {
+                    if (watch(_pageNum).state > 1) {
+                      context.read(_pageNum).state--;
+                    } else {
+                      print('should go back to intro page');
+                      //TODO Add a bit here to pop back to the introduction screen
+                    }
+                  },
+                  color: Colors.black),
+              backgroundColor: Theme.of(context).canvasColor,
+              elevation: 0,
+            ),
+            body: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text(
+                    'Step ' +
+                        (watch(_pageNum).state).toString() +
+                        '/${pageList.length}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6!
+                        .copyWith(color: Theme.of(context).primaryColor),
+                  ),
+                  Spacer(flex: 5),
+                  Expanded(
+                      flex: 150,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                      end: Offset(-1, 0),
+                                      begin: _controller.status ==
+                                              AnimationStatus.reverse
+                                          ? Offset.zero
+                                          : Offset(-1, 0))
+                                  .animate(_animation),
+                              child: _prev, //  child,
                             ),
-                            Positioned.fill(
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                        begin: Offset(
-                                            _controller.status ==
-                                                    AnimationStatus.forward
-                                                ? 0
-                                                : _controller.status ==
-                                                        AnimationStatus.reverse
-                                                    ? 1
-                                                    : 0,
-                                            0),
-                                        end: Offset(
-                                            _controller.status ==
-                                                    AnimationStatus.forward
-                                                ? -1
-                                                : _controller.status ==
-                                                        AnimationStatus.reverse
-                                                    ? 0
-                                                    : 0,
-                                            0))
-                                    .animate(_animation),
-                                child: RepaintBoundary(child: _curr), //  child,
-                              ),
+                          ),
+                          Positioned.fill(
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                      begin: Offset(
+                                          _controller.status ==
+                                                  AnimationStatus.forward
+                                              ? 0
+                                              : _controller.status ==
+                                                      AnimationStatus.reverse
+                                                  ? 1
+                                                  : 0,
+                                          0),
+                                      end: Offset(
+                                          _controller.status ==
+                                                  AnimationStatus.forward
+                                              ? -1
+                                              : _controller.status ==
+                                                      AnimationStatus.reverse
+                                                  ? 0
+                                                  : 0,
+                                          0))
+                                  .animate(_animation),
+                              child: _curr, //  child,
                             ),
-                            Positioned.fill(
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                        begin: Offset(1, 0),
-                                        end: _controller.status ==
-                                                AnimationStatus.forward
-                                            ? Offset.zero
-                                            : Offset(1, 0))
-                                    .animate(_animation),
-                                child: RepaintBoundary(child: _next),
-                              ),
+                          ),
+                          Positioned.fill(
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                      begin: Offset(1, 0),
+                                      end: _controller.status ==
+                                              AnimationStatus.forward
+                                          ? Offset.zero
+                                          : Offset(1, 0))
+                                  .animate(_animation),
+                              child: _next,
                             ),
-                          ],
-                        )),
-                    Spacer(flex: 50),
-                    NavigateButton(
-                        onPressed: () {
-                          var pageNum = context.read(_pageNum).state;
-                          if (pageNum < pageList.length - 1) {
-                            watch(_pageNum).state++;
-                            pageNum++;
-                            _controller.forward(from: 0).then((value) {
-                              setState(() {
-                                _prev = pageList[pageNum - 1];
-                                _curr = pageList[pageNum];
-                                if (++pageNum < pageList.length) {
-                                  _next = pageList[pageNum];
-                                }
-                                _controller.reset();
-                              });
+                          ),
+                        ],
+                      )),
+                  Spacer(flex: 50),
+                  NavigateButton(
+                      onPressed: _controller.isAnimating
+                          ? null
+                          : () {
+                              var index = context.read(_pageNum).state - 1;
+                              if (index < pageList.length - 1) {
+                                watch(_pageNum).state++;
+                                index++;
+                                _controller.forward().whenComplete(() {
+                                  setState(() {
+                                    _prev = pageList[index - 1];
+                                    _curr = pageList[index];
+                                    if (++index < pageList.length) {
+                                      _next = pageList[index];
+                                    }
+                                    _controller.reset();
+                                  });
+                                });
+                              }
+                            },
+                      text: 'Continue'),
+                  NavigateButton(
+                      onPressed: () {
+                        var index = context.read(_pageNum).state - 1;
+                        if (index > 0) {
+                          watch(_pageNum).state--;
+                          index--;
+                          _controller.reverse(from: 1).whenComplete(() {
+                            setState(() {
+                              _next = pageList[index + 1];
+                              _curr = pageList[index];
+                              print(index);
+                              if (--index >= 0) {
+                                print('previous set to $index');
+                                _prev = pageList[index];
+                              }
+                              _controller.reset();
                             });
-                          }
-                        },
-                        text: 'Continue'),
-                    NavigateButton(
-                        onPressed: () {
-                          var pageNum = context.read(_pageNum).state;
-                          if (pageNum > 0) {
-                            watch(_pageNum).state--;
-                            pageNum--;
-                            _controller.reverse(from: 1).then((value) {
-                              setState(() {
-                                _next = pageList[pageNum + 1];
-                                _curr = pageList[pageNum];
-                                if (--pageNum > 0) {
-                                  _prev = pageList[pageNum - 1];
-                                }
-                                _controller.reset();
-                              });
-                            });
-                          }
-                        },
-                        text: 'skip',
-                        highlight: false),
-                    Spacer(flex: 2)
-                  ]),
-            ));
+                          });
+                        }
+                      },
+                      text: 'skip',
+                      highlight: false),
+                  Spacer(flex: 2)
+                ]),
+          ));
 
   static final List<Widget> pageList = [
     Container(
@@ -220,7 +224,7 @@ class _OnboardingPageState extends State<OnboardingPage>
             child: Container(
               decoration: BoxDecoration(),
               clipBehavior: Clip.hardEdge,
-              child: TryingWidget(),
+              child: RepaintBoundary(child: TryingWidget()),
             ),
           )
         ],

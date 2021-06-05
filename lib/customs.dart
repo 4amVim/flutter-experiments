@@ -75,6 +75,7 @@ class NavigateButton extends StatelessWidget {
 
     return highlight
         ? ElevatedButton(
+          
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
                 // primary: color,
