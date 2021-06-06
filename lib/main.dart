@@ -17,6 +17,10 @@ class MyApp extends StatelessWidget {
       home: OnboardingPage());
 }
 
+class UserData {
+  static final Map<String, String> map = {};
+}
+
 class OnboardingPage extends StatefulWidget {
   @override
   _OnboardingPageState createState() => _OnboardingPageState();
@@ -45,6 +49,7 @@ class _OnboardingPageState extends State<OnboardingPage>
       builder: (BuildContext context,
               T Function<T>(ProviderBase<Object?, T>) watch, Widget? child) =>
           Scaffold(
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
               title: Align(
                 alignment: Alignment.center,
@@ -63,11 +68,11 @@ class _OnboardingPageState extends State<OnboardingPage>
               leading: BackButton(
                   onPressed: () {
                     if (watch(_pageNum).state > 1) {
-                      context.read(_pageNum).state--;
                     } else {
                       print('should go back to intro page');
                       //TODO Add a bit here to pop back to the introduction screen
                     }
+                    print(UserData.map);
                   },
                   color: Colors.black),
               backgroundColor: Theme.of(context).canvasColor,
@@ -89,7 +94,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                   ),
                   Spacer(flex: 5),
                   Expanded(
-                      flex: 150,
+                      flex: 180,
                       child: Stack(
                         children: [
                           Positioned.fill(
@@ -143,7 +148,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                           ),
                         ],
                       )),
-                  Spacer(flex: 50),
+                  Spacer(flex: 25),
                   NavigateButton(
                       onPressed: _controller.isAnimating
                           ? null
@@ -175,9 +180,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                             setState(() {
                               _next = pageList[index + 1];
                               _curr = pageList[index];
-                              print(index);
                               if (--index >= 0) {
-                                print('previous set to $index');
                                 _prev = pageList[index];
                               }
                               _controller.reset();
@@ -191,28 +194,60 @@ class _OnboardingPageState extends State<OnboardingPage>
                 ]),
           ));
 
+  static final firstFocus = FocusNode();
+  static final secondFocus = FocusNode();
   static final List<Widget> pageList = [
     Container(
+      //NamePage
       key: ValueKey(0),
-      color: Colors.grey[350],
-      child: Column(
-        children: const [
-          Text('top button'),
-          Image(image: AssetImage('assets/undraw/bitmap/hiking.png')),
-        ],
+      child: Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          children: [
+            Expanded(
+                flex: 0,
+                child: Text('Tell us about yourself',
+                    style: TextStyle(fontSize: 34))),
+            Expanded(
+              flex: 1,
+              child: Text('You can always change this later',
+                  style: TextStyle(fontSize: 24, color: Colors.grey)),
+            ),
+            Spacer(flex: 1),
+            OnboardingText(
+              label: 'First Name',
+              nextFocus: firstFocus,
+            ),
+            OnboardingText(
+              label: 'Last Name',
+              focusNode: firstFocus,
+              nextFocus: secondFocus,
+            ),
+            OnboardingText(
+                label: 'Username', focusNode: secondFocus, isLast: true),
+            Spacer(flex: 1)
+
+            // Image(image: AssetImage('assets/undraw/bitmap/hiking.png')),
+          ],
+        ),
       ),
     ),
     Container(
+      //GenderPge
       color: Colors.white,
       key: ValueKey(1),
       child: Column(
         children: const [
           Text('bottom button'),
-          Image(image: AssetImage('assets/undraw/bitmap/water_bottle.png')),
+          Expanded(
+              flex: 4,
+              child: Image(
+                  image: AssetImage('assets/undraw/bitmap/water_bottle.png'))),
         ],
       ),
     ),
     ConstrainedBox(
+      //HeightPage
       key: ValueKey(2),
       constraints: BoxConstraints.expand(),
       child: Column(
@@ -224,7 +259,9 @@ class _OnboardingPageState extends State<OnboardingPage>
             child: Container(
               decoration: BoxDecoration(),
               clipBehavior: Clip.hardEdge,
-              child: RepaintBoundary(child: TryingWidget()),
+              child: RepaintBoundary(
+                child: TryingWidget(),
+              ),
             ),
           )
         ],
@@ -247,8 +284,6 @@ class _TryingWidgetState extends State<TryingWidget> {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-        print(
-            'Max Width: ${constraints.maxWidth} and Max Height: ${constraints.maxHeight}');
         var width = constraints.maxWidth / 3;
         var height = constraints.maxHeight;
         tape ??= TapeMeasurePaint(width, height);

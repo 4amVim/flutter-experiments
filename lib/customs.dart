@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:starter/main.dart';
 
 class ProgressWidget extends StatefulWidget {
   final double width;
@@ -75,7 +76,6 @@ class NavigateButton extends StatelessWidget {
 
     return highlight
         ? ElevatedButton(
-          
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
                 // primary: color,
@@ -86,9 +86,86 @@ class NavigateButton extends StatelessWidget {
         : TextButton(
             onPressed: onPressed,
             style: TextButton.styleFrom(
-              // primary: color,
-            ),
-
+                // primary: color,
+                ),
             child: child);
   }
+}
+
+class OnboardingText extends StatefulWidget {
+  final double widthFactor;
+  final String label;
+  final int flex;
+  final FocusNode? focusNode;
+  final FocusNode? nextFocus;
+  final bool isLast;
+  OnboardingText(
+      {required this.label,
+      this.widthFactor = 0.8,
+      this.flex = 2,
+      this.focusNode,
+      this.nextFocus,
+      this.isLast = false});
+  @override
+  _OnboardingTextState createState() => _OnboardingTextState();
+}
+
+class _OnboardingTextState extends State<OnboardingText> {
+  late bool done;
+  @override
+  void initState() {
+    done = UserData.map.containsKey(widget.label) &&
+        UserData.map[widget.label]!.isNotEmpty;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        flex: widget.flex,
+        child: FractionallySizedBox(
+          alignment: Alignment.center,
+          widthFactor: widget.widthFactor,
+          child: TextFormField(
+            style: TextStyle(
+              decorationColor: Colors.transparent,
+              decoration: TextDecoration.none,
+              decorationThickness: 0.0,
+              fontSize: 24,
+              color: done ? Colors.white : Colors.black,
+            ),
+            autocorrect: false,
+            initialValue: UserData.map[widget.label],
+            focusNode: widget.focusNode,
+            onEditingComplete: () => setState(() {
+              widget.nextFocus?.requestFocus();
+              done = true;
+              if (widget.isLast) {
+                FocusScope.of(context).unfocus();
+              }
+            }),
+            onChanged: (String str) {
+              UserData.map[widget.label] = str;
+            },
+            onTap: () => setState(() => done = false),
+            // validator: (name) {
+            //   if (name == null || name.isEmpty) {
+            //     return 'Ok, setting a random value';
+            //   } else {
+            //     if (name.contains(RegExp(r'\W'))) {
+            //       return 'Just a word would suffice';
+            //     }
+            //   }
+            // },
+            decoration: InputDecoration(
+              suffixIcon:
+                  done ? Icon(Icons.check, color: Colors.white) : null,
+              fillColor: done ? Colors.lightBlue : null,
+              filled: done,
+              labelText: done ? null : widget.label,
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30))),
+            ),
+          ),
+        ),
+      );
 }

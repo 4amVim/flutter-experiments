@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 ///Draws a vertical tape measure that gives a measurment [rawReading]
 class TapeMeasurePaint extends CustomPainter {
   //*Color for the tape's background
-  static const _color = Colors.blue;
-  static const _ticksColor = Colors.black;
-  static const _arrowNotTouchedColor = Color(0xFFFFFFFF);
-  static const _arrowTouchedColor = Color(0xCFFFFFFF);
-  static const _textColor = Colors.red;
+  static const _backgroundColor = Colors.transparent;
+  static const _ticksColor = Colors.lightBlue;
+  static final _arrowColor = Colors.lightBlueAccent.withOpacity(0.91);
+  static const _textColor = Colors.black;
 
   ///Instantaneous, scaled offset of the tape
   double _offset = 0;
@@ -59,7 +58,7 @@ class TapeMeasurePaint extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas //? Color the background, centre x-axis and do x-translation
-      ..drawRect(Offset.zero & size, Paint()..color = _color)
+      ..drawRect(Offset.zero & size, Paint()..color = _backgroundColor)
       ..save() //? We're saving basic state for later when we draw an arrow
       ..translate(size.width, .0) //? Vertically centre the x-axis
       ..translate(0, _start) //? Offset the start (to persist between touches)
@@ -79,7 +78,7 @@ class TapeMeasurePaint extends CustomPainter {
               style: TextStyle(fontSize: fontSize, color: _textColor)),
           textDirection: TextDirection.ltr)
         ..layout(minWidth: size.width * 0.2, maxWidth: size.width * 0.8)
-        ..paint(cvs, Offset(-0.65 * size.width, xOffset - 0.04 * size.width));
+        ..paint(cvs, Offset(-0.71 * size.width, xOffset - 0.04 * size.width));
 
       //* Draw segments
       cvs.save();
@@ -113,23 +112,16 @@ class TapeMeasurePaint extends CustomPainter {
 
     _addSegmentsAbove(canvas, 250, false);
 
-    var arrowPath = Path()
-      ..addRect(Offset(size.width / 2, size.height / 3) &
-          Size(size.width, size.height / 80))
-      ..lineTo(size.width / 2, -20 + size.height / 3) //?Line up
-      ..lineTo(-30 + size.width / 2, (163 * size.height / 480))
-      ..lineTo(size.width / 2, 20 + (83 * size.height / 240));
     canvas
       ..restore()
       ..save()
-      //?If user is scrolling, have the arrow slightly more to the right
-      ..translate(-10, 0)
-      //?If user is scrolling, have the arrow slightly more opaque
+      ..translate(-10, _gapSize)
       ..drawPath(
-          arrowPath,
-          Paint()
-            ..color =
-                _offset.abs() < 15 ? _arrowNotTouchedColor : _arrowTouchedColor)
+          Path()
+            ..moveTo(size.width + 20, size.height / 3 + 15)
+            ..lineTo(size.width, size.height / 3)
+            ..lineTo(size.width + 20, size.height / 3 - 15),
+          Paint()..color = _arrowColor)
       ..restore();
   }
 
