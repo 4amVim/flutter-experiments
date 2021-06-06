@@ -276,7 +276,8 @@ class TryingWidget extends StatefulWidget {
 }
 
 class _TryingWidgetState extends State<TryingWidget> {
-  String _debugText = 'Go on do it!';
+  String _metricText = 'Go on do it!';
+  // String _imperialText = 'Go on do it!';
   late Offset touchStart;
   TapeMeasurePaint? tape;
 
@@ -292,7 +293,6 @@ class _TryingWidgetState extends State<TryingWidget> {
           fit: StackFit.expand,
           children: [
             //? This paints the tape-measure
-
             Positioned(
               left: constraints.maxWidth / 8,
               child: Listener(
@@ -301,7 +301,7 @@ class _TryingWidgetState extends State<TryingWidget> {
                 onPointerMove: (details) => setState(() {
                   tape!.offsetBy(details.localPosition.dy - touchStart.dy);
                   double inches = (double.parse(tape!.reading) / 2.54);
-                  _debugText = _isRetardUnits
+                  _metricText = _isRetardUnits
                       ? '${inches ~/ 12}feet ${(inches % 12).toStringAsFixed(1)}in'
                       : '${tape!.reading} cm';
                 }),
@@ -317,7 +317,7 @@ class _TryingWidgetState extends State<TryingWidget> {
             Positioned(
                 left: 8 * constraints.maxWidth / 15,
                 top: constraints.maxHeight / 2,
-                child: Text(_debugText,
+                child: Text(_metricText,
                     softWrap: true,
                     style: Theme.of(context).textTheme.headline5)),
             Positioned(
